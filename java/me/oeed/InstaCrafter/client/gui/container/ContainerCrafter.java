@@ -12,7 +12,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerWorkbench;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -27,7 +29,11 @@ public class ContainerCrafter extends Container {
 	public InventoryPlayer invPlayer;
 	public InventoryRecipes availableRecipes;
 	public boolean isClientSideOnly;
+
+	//used to 'mimic' a crafting table
 	public ContainerWorkbench craftingTable;
+    public InventoryCrafting craftMatrix = new InventoryCrafting(this, 3, 3);
+    public IInventory craftResult = new InventoryCraftResult();
 	
 	private static InventoryBasic inventory = new InventoryBasic("tmp", true, 46);
 	
@@ -103,8 +109,9 @@ public class ContainerCrafter extends Container {
 				&& inventorySlots.get(slotIndex) instanceof CrafterSlot) {
 			CrafterSlot slot = (CrafterSlot) inventorySlots.get(slotIndex);
 
-			LogHelper.log("dia!");
-			ItemStack crafted = CraftingHelper.craftItem(slot.getStack(), entityPlayer.inventory);
+	        List<ItemStack> usedIngredients = new ArrayList();
+	        List<IRecipe> usedRecipes = new ArrayList();
+			ItemStack crafted = CraftingHelper.craftItem(slot.getStack(), entityPlayer.inventory, usedIngredients, usedRecipes, craftingTable, craftMatrix, craftResult);
 			update();
 			return crafted;
 			

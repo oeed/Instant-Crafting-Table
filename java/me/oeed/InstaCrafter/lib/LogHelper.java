@@ -18,6 +18,9 @@ public class LogHelper {
 	}
 	
 	public static void log(Object message, Level logLevel) {
+		if(message == null)
+			logger.log(logLevel, "NULL");
+		else
 		logger.log(logLevel, message.toString());
 	}
 }

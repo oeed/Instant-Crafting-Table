@@ -2,6 +2,7 @@ package me.oeed.InstaCrafter.client.gui;
 
 import java.lang.reflect.Field;
 
+import me.oeed.InstaCrafter.CrafterSlot;
 import me.oeed.InstaCrafter.InstaCrafter;
 import me.oeed.InstaCrafter.client.gui.container.ContainerCrafter;
 import me.oeed.InstaCrafter.lib.LogHelper;
@@ -23,6 +24,8 @@ import org.lwjgl.opengl.GL11;
 public class GuiCrafter extends GuiContainer{
 	public static final ResourceLocation texture = new ResourceLocation(InstaCrafter.MODID.toLowerCase(), "textures/gui/crafter.png");
 	public boolean isClientSideOnly;
+	
+	//used to 'mimic' a crafting table
 	public ContainerWorkbench craftingTable;
 	
 	public GuiCrafter(InventoryPlayer invPlayer, boolean isClientSideOnly, ContainerWorkbench craftingTable){
@@ -47,26 +50,29 @@ public class GuiCrafter extends GuiContainer{
 	}
 	
 	@Override
-	protected void handleMouseClick(Slot par1Slot, int par2, int par3, int par4){
+	protected void handleMouseClick(Slot slot, int slotIndex, int mouse, int shiftPressed){
+		if(!(slot instanceof CrafterSlot))
+			return;
+		
 		LogHelper.log("Clickity click!");
-        if (par1Slot != null)
+        if (slot != null)
         {
-            par2 = par1Slot.slotNumber;
+            slotIndex = slot.slotNumber;
         }
 
-        this.mc.playerController.windowClick(this.inventorySlots.windowId, par2, par3, par4, this.mc.thePlayer);
+        //this.mc.playerController.windowClick(this.inventorySlots.windowId, par2, par3, par4, this.mc.thePlayer);
 
         short short1 = this.mc.thePlayer.openContainer.getNextTransactionID(this.mc.thePlayer.inventory);
 
-        ItemStack itemstack = this.mc.thePlayer.openContainer.slotClick(par2, par3, par4, this.mc.thePlayer);
-        this.mc.thePlayer.inventory.setItemStack(itemstack);
+        ItemStack itemstack = this.mc.thePlayer.openContainer.slotClick(slotIndex, mouse, shiftPressed, this.mc.thePlayer);
+        //this.mc.thePlayer.inventory.setItemStack(itemstack);
         if(!isClientSideOnly){
 	        //if the server is taking part too let it know
 	        try {   
 		        Field field = PlayerControllerMP.class.getDeclaredField("netClientHandler");
 		        field.setAccessible(true);
 		        NetClientHandler netClientHandler = (NetClientHandler) field.get(this.mc.playerController);
-		        netClientHandler.addToSendQueue(new Packet102WindowClick(this.inventorySlots.windowId, par2, par3, par4, itemstack, short1));
+		        netClientHandler.addToSendQueue(new Packet102WindowClick(this.inventorySlots.windowId, slotIndex, mouse, shiftPressed, itemstack, short1));
 	        } catch (NoSuchFieldException e) {
 	            throw new RuntimeException(e);
 	        } catch (IllegalAccessException e) {
