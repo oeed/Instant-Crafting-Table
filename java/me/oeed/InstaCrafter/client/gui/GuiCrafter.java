@@ -42,15 +42,18 @@ public class GuiCrafter extends GuiContainer{
 	}
 	
 	public void actionPerformed(GuiButton button){
-		if(button.id == 0){
+		if(button.id == 0)
 			GuiHelper.toggleCrafter();
-		}
+		else if(button.id == 1)
+			LogHelper.log("State: "+((GuiButtonCheckbox)button).isChecked);
 	}
 	
 	public void initGui(){
 		super.initGui();
 		buttonList.clear();
 		buttonList.add(new GuiButtonCrafterToggle(0, this.guiLeft + 174, this.guiTop + 4, false));
+		buttonList.add(new GuiButtonCheckbox(1, this.guiLeft + 8, this.guiTop + 198, "Default View", false));
+		//TODO: localisation
 	}
 	
 	@Override

@@ -7,4 +7,9 @@ public class CommonProxy {
 		
 	}
 
+	public void registerClientTickHandler() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

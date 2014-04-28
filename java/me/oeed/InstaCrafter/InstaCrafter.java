@@ -2,7 +2,8 @@ package me.oeed.InstaCrafter;
 
 import java.util.logging.Level;
 
-import me.oeed.InstaCrafter.client.InstaCrafterKeyHandler;
+import me.oeed.InstaCrafter.client.ClientTickHandler;
+import me.oeed.InstaCrafter.client.ClientKeyHandler;
 import me.oeed.InstaCrafter.client.gui.GuiHandler;
 import me.oeed.InstaCrafter.lib.LogHelper;
 import net.minecraft.client.settings.KeyBinding;
@@ -19,6 +20,8 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = InstaCrafter.MODID, name = InstaCrafter.NAME, version = InstaCrafter.VERSION)
 @NetworkMod(clientSideRequired = true, serverSideRequired = true)
@@ -32,9 +35,6 @@ public class InstaCrafter
        @Instance("InstaCrafter")
        public static InstaCrafter instance;
       
-       // Says where the client and server 'proxy' cod e is loaded.
-       //@SidedProxy(clientSide="me.oeed.InstaCrafter.client.ClientProxy", serverSide="me.oeed.InstaCrafter.CommonProxy")
-       //public static CommonProxy proxy;
       
        @EventHandler
        public void preInit(FMLPreInitializationEvent event) {
@@ -43,20 +43,22 @@ public class InstaCrafter
       
        @EventHandler
        public void load(FMLInitializationEvent event) {
-            //   proxy.registerRenderers();
-               
-               
                if(FMLCommonHandler.instance().getSide().isClient()){
                    LogHelper.log("Starting client...");
                    LogHelper.log("Registering keybind...");
                    KeyBinding[] key = {new KeyBinding("Toggle Crafting Interface", Keyboard.KEY_CIRCUMFLEX)};
                    boolean[] repeat = {false};
-                   KeyBindingRegistry.registerKeyBinding(new InstaCrafterKeyHandler(key, repeat));
+                   KeyBindingRegistry.registerKeyBinding(new ClientKeyHandler(key, repeat));
                    LogHelper.log("Keybind registered");
-                   new GuiHandler();
-            	   
+                   
+
+	               	LogHelper.log("Registering tick handler...");
+	               	TickRegistry.registerTickHandler(new ClientTickHandler(), Side.CLIENT);
+	               	LogHelper.log("Registered tick handler");
+                   //new GuiHandler();
+                  
                }else{
-                   LogHelper.log("You shouldn't be running this ("+InstaCrafter.NAME+") as a server mod! While it shouldn't cause issues it is a waste of resources.", Level.WARNING);
+                   LogHelper.log("You shouldn't be running this ("+InstaCrafter.NAME+") as a server mod! While it *shouldn't* cause issues it is a waste of resources.", Level.WARNING);
             	   
                }
 

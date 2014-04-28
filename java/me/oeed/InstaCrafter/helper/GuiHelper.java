@@ -5,6 +5,7 @@ import me.oeed.InstaCrafter.client.gui.GuiCrafter;
 import me.oeed.InstaCrafter.client.gui.GuiCraftingCustom;
 import me.oeed.InstaCrafter.client.gui.container.ContainerCrafter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.inventory.GuiCrafting;
 import net.minecraft.inventory.ContainerWorkbench;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -23,8 +24,20 @@ public class GuiHelper {
         else if(client.thePlayer.openContainer instanceof ContainerCrafter){
         	//TODO: prevent items from being destoryed when switching
         	//client.thePlayer.displayGUIWorkbench((int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ);
-
-            FMLCommonHandler.instance().showGuiScreen(new GuiCraftingCustom(client.thePlayer.inventory, client.thePlayer.worldObj, (int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ));
+        	displayCustomCraftingInterface();
+            
         }
+	}
+	
+	public static void displayCustomCraftingInterface(){
+		Minecraft client = FMLClientHandler.instance().getClient();
+		FMLCommonHandler.instance().showGuiScreen(new GuiCraftingCustom(client.thePlayer.inventory, client.thePlayer.worldObj, (int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ));
+	}
+	
+	//if the vanilla crafting interface is open switch to the custom one
+	public static void convertToCustomCraftingInterface(){
+		Minecraft client = FMLClientHandler.instance().getClient();
+        if(client.currentScreen instanceof GuiCrafting && client.thePlayer.openContainer instanceof ContainerWorkbench)
+        	displayCustomCraftingInterface();
 	}
 }

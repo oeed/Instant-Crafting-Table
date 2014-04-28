@@ -15,13 +15,13 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.TickType;
 
-public class InstaCrafterKeyHandler extends KeyHandler {
+public class ClientKeyHandler extends KeyHandler {
 
     private EnumSet tickTypes = EnumSet.of(TickType.CLIENT);
     
     public static boolean keyPressed = false;
 
-    public InstaCrafterKeyHandler(KeyBinding[] keyBindings, boolean[] repeatings){
+    public ClientKeyHandler(KeyBinding[] keyBindings, boolean[] repeatings){
             super(keyBindings, repeatings);
     }
     

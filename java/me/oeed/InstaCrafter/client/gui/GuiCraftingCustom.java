@@ -2,6 +2,7 @@ package me.oeed.InstaCrafter.client.gui;
 
 import me.oeed.InstaCrafter.InstaCrafter;
 import me.oeed.InstaCrafter.helper.GuiHelper;
+import me.oeed.InstaCrafter.lib.LogHelper;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
@@ -33,16 +34,18 @@ public class GuiCraftingCustom extends GuiContainer {
         this.fontRenderer.drawString(I18n.getString("container.inventory"), 8, this.ySize - 106 + 2, 4210752);
     }
 	
+	public void actionPerformed(GuiButton button){
+		if(button.id == 0)
+			GuiHelper.toggleCrafter();
+		else if(button.id == 1)
+			LogHelper.log("State: "+((GuiButtonCheckbox)button).isChecked);
+	}
+	
 	public void initGui(){
 		super.initGui();
 		buttonList.clear();
 		buttonList.add(new GuiButtonCrafterToggle(0, this.guiLeft + 158, this.guiTop + 5, true));
-	}
-	
-	public void actionPerformed(GuiButton button){
-		if(button.id == 0){
-			GuiHelper.toggleCrafter();
-		}
+		buttonList.add(new GuiButtonCheckbox(1, this.guiLeft + 7, this.guiTop + 160, "Default View", true));
 	}
 
     /**
