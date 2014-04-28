@@ -1,5 +1,7 @@
 package me.oeed.InstaCrafter;
 
+import java.util.logging.Level;
+
 import me.oeed.InstaCrafter.client.InstaCrafterKeyHandler;
 import me.oeed.InstaCrafter.client.gui.GuiHandler;
 import me.oeed.InstaCrafter.lib.LogHelper;
@@ -18,7 +20,7 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 
-@Mod(modid = InstaCrafter.MODID, name = "A Test", version = InstaCrafter.VERSION)
+@Mod(modid = InstaCrafter.MODID, name = InstaCrafter.NAME, version = InstaCrafter.VERSION)
 @NetworkMod(clientSideRequired = true, serverSideRequired = true)
 public class InstaCrafter
 {
@@ -30,9 +32,9 @@ public class InstaCrafter
        @Instance("InstaCrafter")
        public static InstaCrafter instance;
       
-       // Says where the client and server 'proxy' code is loaded.
-       @SidedProxy(clientSide="me.oeed.InstaCrafter.client.ClientProxy", serverSide="me.oeed.InstaCrafter.CommonProxy")
-       public static CommonProxy proxy;
+       // Says where the client and server 'proxy' cod e is loaded.
+       //@SidedProxy(clientSide="me.oeed.InstaCrafter.client.ClientProxy", serverSide="me.oeed.InstaCrafter.CommonProxy")
+       //public static CommonProxy proxy;
       
        @EventHandler
        public void preInit(FMLPreInitializationEvent event) {
@@ -41,22 +43,25 @@ public class InstaCrafter
       
        @EventHandler
        public void load(FMLInitializationEvent event) {
-               proxy.registerRenderers();
-               LogHelper.log("Alive");
+            //   proxy.registerRenderers();
                
                
                if(FMLCommonHandler.instance().getSide().isClient()){
-                   KeyBinding[] key = {new KeyBinding("Name of Button", Keyboard.KEY_G)};
+                   LogHelper.log("Starting client...");
+                   LogHelper.log("Registering keybind...");
+                   KeyBinding[] key = {new KeyBinding("Toggle Crafting Interface", Keyboard.KEY_CIRCUMFLEX)};
                    boolean[] repeat = {false};
                    KeyBindingRegistry.registerKeyBinding(new InstaCrafterKeyHandler(key, repeat));
+                   LogHelper.log("Keybind registered");
+                   new GuiHandler();
             	   
                }else{
-                   LogHelper.log("Server");
+                   LogHelper.log("You shouldn't be running this ("+InstaCrafter.NAME+") as a server mod! While it shouldn't cause issues it is a waste of resources.", Level.WARNING);
             	   
                }
 
                
-               new GuiHandler();
+//               LogHelper.log("reg gui");
                //NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
                //System.out.println(new ResourceLocation("basic", "textures/gui/container.png"));
        }
@@ -64,5 +69,7 @@ public class InstaCrafter
        @EventHandler
        public void postInit(FMLPostInitializationEvent event) {
                // Stub Method
+           LogHelper.log("post init");
        }
+       
 }

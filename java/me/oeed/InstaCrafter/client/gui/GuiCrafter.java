@@ -5,8 +5,11 @@ import java.lang.reflect.Field;
 import me.oeed.InstaCrafter.CrafterSlot;
 import me.oeed.InstaCrafter.InstaCrafter;
 import me.oeed.InstaCrafter.client.gui.container.ContainerCrafter;
+import me.oeed.InstaCrafter.helper.CraftingHelper;
+import me.oeed.InstaCrafter.helper.GuiHelper;
 import me.oeed.InstaCrafter.lib.LogHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.multiplayer.NetClientHandler;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -35,7 +38,19 @@ public class GuiCrafter extends GuiContainer{
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
 		xSize = 195;
-		ySize = 204;
+		ySize = 214;
+	}
+	
+	public void actionPerformed(GuiButton button){
+		if(button.id == 0){
+			GuiHelper.toggleCrafter();
+		}
+	}
+	
+	public void initGui(){
+		super.initGui();
+		buttonList.clear();
+		buttonList.add(new GuiButtonCrafterToggle(0, this.guiLeft + 174, this.guiTop + 4, false));
 	}
 	
 	@Override
@@ -51,9 +66,13 @@ public class GuiCrafter extends GuiContainer{
 	
 	@Override
 	protected void handleMouseClick(Slot slot, int slotIndex, int mouse, int shiftPressed){
-		if(!(slot instanceof CrafterSlot))
+		if(!(slot instanceof CrafterSlot)){
+			//this.mc.playerController.windowClick(this.craftingTable.windowId, int slotIndex, int mouse, int shiftPressed, this.mc.thePlayer);
+
+			LogHelper.log("Crafting table click!");
+			CraftingHelper.craftingWindowClick(craftingTable, CraftingHelper.convertToCraftingSlot(craftingTable, slotIndex), mouse, shiftPressed, this.mc.thePlayer);
 			return;
-		
+		}
 		LogHelper.log("Clickity click!");
         if (slot != null)
         {

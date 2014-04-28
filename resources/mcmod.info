@@ -1,9 +1,9 @@
 [
 {
   "modid": "InstaCrafter",
-  "name": "A Test",
+  "name": "InstaCrafter",
   "description": "Example placeholder mod.",
-  "version": "${version}",
+  "version": "1.0",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",

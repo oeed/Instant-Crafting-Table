@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import me.oeed.InstaCrafter.InstaCrafter;
 import me.oeed.InstaCrafter.client.gui.GuiCrafter;
 import me.oeed.InstaCrafter.client.gui.container.ContainerCrafter;
+import me.oeed.InstaCrafter.helper.GuiHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.inventory.ContainerWorkbench;
@@ -26,23 +27,16 @@ public class InstaCrafterKeyHandler extends KeyHandler {
     
     @Override
     public String getLabel(){
-            return "TutorialKey";
+            return "Instant Crafing Table";
     }
     
     @Override
     public void keyDown(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd, boolean isRepeat){
+        System.out.println("tick d");
     	if(!tickEnd){
 	            //what to do when key is pressed/down
 	        System.out.println("down");
-	        Minecraft client = FMLClientHandler.instance().getClient();
-	        
-	        if(client.thePlayer.openContainer instanceof ContainerWorkbench){
-		        ModContainer mc = FMLCommonHandler.instance().findContainerFor(InstaCrafter.instance);
-	            FMLCommonHandler.instance().showGuiScreen(new GuiCrafter(client.thePlayer.inventory, true, (ContainerWorkbench)client.thePlayer.openContainer));
-	        }
-	        else if(client.thePlayer.openContainer instanceof ContainerCrafter){
-	        	client.thePlayer.displayGUIWorkbench((int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ);
-	        }
+	        GuiHelper.toggleCrafter();
 //	        client.thePlayer.openGui(InstaCrafter.instance, 0, client.theWorld, (int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ);
 	        //FMLNetworkHandler.openGui(client.thePlayer, InstaCrafter.instance, 0, client.theWorld, (int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ);
 
@@ -58,6 +52,7 @@ public class InstaCrafterKeyHandler extends KeyHandler {
     
     @Override
     public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd){
+        System.out.println("tick u");
     	if(tickEnd){
     		keyPressed = false;
     	}

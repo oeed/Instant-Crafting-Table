@@ -76,13 +76,24 @@ public class CraftingHelper {
 	}
 	
 	
+	// converts the slot number of the crafting gui to the crafting table one
+	public static int convertToCraftingSlot(ContainerWorkbench craftingTable, int invSlot){
+		//TODO: use a less hard coded way
+		//converting the player invSlot to the crafting table slot, this is pretty hacky and should use a better method
+		if(invSlot >= 0 && invSlot <= 8){
+			//hotbar
+			invSlot += 37;
+		}
+		else if(invSlot >= 9 && invSlot <= 45){
+			invSlot += 1;            			
+		}
+		return invSlot;
+	}
 	
-
-	
-	private static ItemStack craftingWindowClick(ContainerWorkbench craftingTable, int par2, int par3, int par4, EntityPlayer par5EntityPlayer){
+	public static ItemStack craftingWindowClick(ContainerWorkbench craftingTable, int par2, int par3, int par4, EntityPlayer par5EntityPlayer){
         short short1 = craftingTable.getNextTransactionID(par5EntityPlayer.inventory);
         ItemStack itemstack = craftingTable.slotClick(par2, par3, par4, par5EntityPlayer);
-        try {   
+        try {
 	        Field field = PlayerControllerMP.class.getDeclaredField("netClientHandler");
 	        field.setAccessible(true);
 	        NetClientHandler netClientHandler = (NetClientHandler) field.get(Minecraft.getMinecraft().playerController);
@@ -94,6 +105,14 @@ public class CraftingHelper {
             throw new RuntimeException(e);
         }
     }
+//	
+//	2014-04-28 08:56:56 [INFO] [STDERR] at org.multimc.EntryPoint.listen(EntryPoint.java:165)
+//	2014-04-28 08:56:56 [INFO] [STDERR] at org.multimc.EntryPoint.main(EntryPoint.java:54)
+//	2014-04-28 08:56:56 [INFO] [STDERR] Caused by: java.lang.RuntimeException: java.lang.NoSuchFieldException: netClientHandler
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.helper.CraftingHelper.craftingWindowClick(CraftingHelper.java:92)
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.helper.CraftingHelper.doCraft(CraftingHelper.java:124)
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.helper.CraftingHelper.craftItem(CraftingHelper.java:155)
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.client.gui.container.ContainerCrafter.fu
 	
 	public static boolean doCraft(IRecipe recipe, InventoryPlayer invPlayer, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix, IInventory craftResult){
 		Minecraft client = FMLClientHandler.instance().getClient();
@@ -108,18 +127,10 @@ public class CraftingHelper {
         				continue;
         			else
         				itemsSlot ++;
-        			int invSlot = InventoryHelper.findItemInInventory(invPlayer, itemStack);
+        			int invSlot = convertToCraftingSlot(craftingTable, InventoryHelper.findItemInInventory(invPlayer, itemStack));
 
         			
-            		//TODO: use a less hard coded way
-            		//converting the player invSlot to the crafting table slot, this is pretty hacky and should use a better method
-            		if(invSlot >= 0 && invSlot <= 8){
-            			//hotbar
-            			invSlot += 37;
-            		}
-            		else if(invSlot >= 9 && invSlot <= 45){
-            			invSlot += 1;            			
-            		}
+            		
         			
         			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item slot that contains the needed item
         			craftingWindowClick(craftingTable, matrixSlot + 1, mouseRightClick, shiftNotHeld, invPlayer.player); //'fake' click the needed item in to the crafting table
