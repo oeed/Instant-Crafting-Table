@@ -1,4 +1,4 @@
-package me.oeed.InstaCrafter;
+package me.oeed.InstantCraftingTable;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;

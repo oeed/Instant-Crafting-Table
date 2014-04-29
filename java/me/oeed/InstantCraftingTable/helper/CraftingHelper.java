@@ -1,4 +1,4 @@
-package me.oeed.InstaCrafter.helper;
+package me.oeed.InstantCraftingTable.helper;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import me.oeed.InstaCrafter.InventoryRecipes;
-import me.oeed.InstaCrafter.lib.LogHelper;
+import me.oeed.InstantCraftingTable.InventoryRecipes;
+import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.NetClientHandler;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -109,10 +109,10 @@ public class CraftingHelper {
 //	2014-04-28 08:56:56 [INFO] [STDERR] at org.multimc.EntryPoint.listen(EntryPoint.java:165)
 //	2014-04-28 08:56:56 [INFO] [STDERR] at org.multimc.EntryPoint.main(EntryPoint.java:54)
 //	2014-04-28 08:56:56 [INFO] [STDERR] Caused by: java.lang.RuntimeException: java.lang.NoSuchFieldException: netClientHandler
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.helper.CraftingHelper.craftingWindowClick(CraftingHelper.java:92)
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.helper.CraftingHelper.doCraft(CraftingHelper.java:124)
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.helper.CraftingHelper.craftItem(CraftingHelper.java:155)
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstaCrafter.client.gui.container.ContainerCrafter.fu
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.helper.CraftingHelper.craftingWindowClick(CraftingHelper.java:92)
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.helper.CraftingHelper.doCraft(CraftingHelper.java:124)
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.helper.CraftingHelper.craftItem(CraftingHelper.java:155)
+//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.client.gui.container.ContainerCrafter.fu
 	
 	public static boolean doCraft(IRecipe recipe, InventoryPlayer invPlayer, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix, IInventory craftResult){
 		Minecraft client = FMLClientHandler.instance().getClient();

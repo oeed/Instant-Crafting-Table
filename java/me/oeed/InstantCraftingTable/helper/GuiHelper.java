@@ -1,9 +1,11 @@
-package me.oeed.InstaCrafter.helper;
+package me.oeed.InstantCraftingTable.helper;
 
-import me.oeed.InstaCrafter.InstaCrafter;
-import me.oeed.InstaCrafter.client.gui.GuiCrafter;
-import me.oeed.InstaCrafter.client.gui.GuiCraftingCustom;
-import me.oeed.InstaCrafter.client.gui.container.ContainerCrafter;
+import me.oeed.InstantCraftingTable.InstantCraftingTable;
+import me.oeed.InstantCraftingTable.client.gui.GuiButtonCheckbox;
+import me.oeed.InstantCraftingTable.client.gui.GuiCrafter;
+import me.oeed.InstantCraftingTable.client.gui.GuiCraftingCustom;
+import me.oeed.InstantCraftingTable.client.gui.container.ContainerCrafter;
+import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiCrafting;
 import net.minecraft.inventory.ContainerWorkbench;
@@ -16,20 +18,34 @@ public class GuiHelper {
 	//toggles between the crafting table interface and the instant crafting interface
 	public static void toggleCrafter(){
 		Minecraft client = FMLClientHandler.instance().getClient();
-        
-        if(client.thePlayer.openContainer instanceof ContainerWorkbench){
-	        ModContainer mc = FMLCommonHandler.instance().findContainerFor(InstaCrafter.instance);
-            FMLCommonHandler.instance().showGuiScreen(new GuiCrafter(client.thePlayer.inventory, true, (ContainerWorkbench)client.thePlayer.openContainer));
-        }
+        if(client.thePlayer.openContainer instanceof ContainerWorkbench)
+        	displayInstantCraftingInterface();
         else if(client.thePlayer.openContainer instanceof ContainerCrafter){
         	//TODO: prevent items from being destoryed when switching
         	//client.thePlayer.displayGUIWorkbench((int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ);
         	displayCustomCraftingInterface();
-            
         }
 	}
 	
+	public static void displayDefaultInterface(){
+		if(InstantCraftingTable.instance.configHelper.getValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT)){
+        	displayCustomCraftingInterface();
+		}
+		else{
+			displayInstantCraftingInterface();
+		}
+	}
+	
+	//display the instant crafting interface
+	public static void displayInstantCraftingInterface(){
+		Minecraft client = FMLClientHandler.instance().getClient();
+        ModContainer mc = FMLCommonHandler.instance().findContainerFor(InstantCraftingTable.instance);
+        FMLCommonHandler.instance().showGuiScreen(new GuiCrafter(client.thePlayer.inventory, true, (ContainerWorkbench)client.thePlayer.openContainer));	
+	}
+	
+	//display the (customised) vanilla interface
 	public static void displayCustomCraftingInterface(){
+		LogHelper.log("Replacing vanilla crafting interface...");
 		Minecraft client = FMLClientHandler.instance().getClient();
 		FMLCommonHandler.instance().showGuiScreen(new GuiCraftingCustom(client.thePlayer.inventory, client.thePlayer.worldObj, (int)client.thePlayer.posX, (int)client.thePlayer.posY, (int)client.thePlayer.posZ));
 	}
@@ -38,6 +54,6 @@ public class GuiHelper {
 	public static void convertToCustomCraftingInterface(){
 		Minecraft client = FMLClientHandler.instance().getClient();
         if(client.currentScreen instanceof GuiCrafting && client.thePlayer.openContainer instanceof ContainerWorkbench)
-        	displayCustomCraftingInterface();
+        	displayDefaultInterface();
 	}
 }

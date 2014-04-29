@@ -1,13 +1,13 @@
-package me.oeed.InstaCrafter.lib;
+package me.oeed.InstantCraftingTable.lib;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import me.oeed.InstaCrafter.InstaCrafter;
+import me.oeed.InstantCraftingTable.InstantCraftingTable;
 import cpw.mods.fml.common.FMLLog;
 
 public class LogHelper {
-	private static Logger logger = Logger.getLogger(InstaCrafter.NAME);
+	private static Logger logger = Logger.getLogger(InstantCraftingTable.NAME);
 	
 	public static void init() {
 		logger.setParent(FMLLog.getLogger());

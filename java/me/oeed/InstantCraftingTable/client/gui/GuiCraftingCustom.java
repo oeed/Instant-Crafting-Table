@@ -1,8 +1,9 @@
-package me.oeed.InstaCrafter.client.gui;
+package me.oeed.InstantCraftingTable.client.gui;
 
-import me.oeed.InstaCrafter.InstaCrafter;
-import me.oeed.InstaCrafter.helper.GuiHelper;
-import me.oeed.InstaCrafter.lib.LogHelper;
+import me.oeed.InstantCraftingTable.InstantCraftingTable;
+import me.oeed.InstantCraftingTable.helper.ConfigHelper;
+import me.oeed.InstantCraftingTable.helper.GuiHelper;
+import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
@@ -15,7 +16,7 @@ import org.lwjgl.opengl.GL11;
 
 public class GuiCraftingCustom extends GuiContainer {
 
-	public static final ResourceLocation texture = new ResourceLocation(InstaCrafter.MODID.toLowerCase(), "textures/gui/crafting_table.png");
+	public static final ResourceLocation texture = new ResourceLocation(InstantCraftingTable.MODID.toLowerCase(), "textures/gui/crafting_table.png");
     
     /**
 	 * A replacement crafting interface that adds the check box and toggle button
@@ -37,15 +38,17 @@ public class GuiCraftingCustom extends GuiContainer {
 	public void actionPerformed(GuiButton button){
 		if(button.id == 0)
 			GuiHelper.toggleCrafter();
-		else if(button.id == 1)
+		else if(button.id == 1){
 			LogHelper.log("State: "+((GuiButtonCheckbox)button).isChecked);
+			InstantCraftingTable.instance.configHelper.setValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT, ((GuiButtonCheckbox)button).isChecked);
+		}
 	}
 	
 	public void initGui(){
 		super.initGui();
 		buttonList.clear();
 		buttonList.add(new GuiButtonCrafterToggle(0, this.guiLeft + 158, this.guiTop + 5, true));
-		buttonList.add(new GuiButtonCheckbox(1, this.guiLeft + 7, this.guiTop + 160, "Default View", true));
+		buttonList.add(new GuiButtonCheckbox(1, this.guiLeft + 7, this.guiTop + 160, I18n.getString("instantCraftingTable.defaultView"), InstantCraftingTable.instance.configHelper.getValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT)));
 	}
 
     /**

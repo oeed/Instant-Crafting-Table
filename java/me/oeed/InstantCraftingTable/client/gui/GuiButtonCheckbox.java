@@ -1,6 +1,6 @@
-package me.oeed.InstaCrafter.client.gui;
+package me.oeed.InstantCraftingTable.client.gui;
 
-import me.oeed.InstaCrafter.InstaCrafter;
+import me.oeed.InstantCraftingTable.InstantCraftingTable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
@@ -9,7 +9,7 @@ import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 public class GuiButtonCheckbox extends GuiButton {
-	public static final ResourceLocation texture = new ResourceLocation(InstaCrafter.MODID.toLowerCase(), "textures/gui/crafter.png");
+	public static final ResourceLocation texture = new ResourceLocation(InstantCraftingTable.MODID.toLowerCase(), "textures/gui/crafter.png");
 	
 	public boolean isChecked;
 	

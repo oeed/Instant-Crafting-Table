@@ -1,4 +1,4 @@
-package me.oeed.InstaCrafter.helper;
+package me.oeed.InstantCraftingTable.helper;
 
 import java.util.ArrayList;
 import java.util.List;

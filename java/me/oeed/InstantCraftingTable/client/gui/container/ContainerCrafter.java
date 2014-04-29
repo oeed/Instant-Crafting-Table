@@ -1,13 +1,13 @@
-package me.oeed.InstaCrafter.client.gui.container;
+package me.oeed.InstantCraftingTable.client.gui.container;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import me.oeed.InstaCrafter.CrafterSlot;
-import me.oeed.InstaCrafter.InventoryRecipes;
-import me.oeed.InstaCrafter.helper.CraftingHelper;
-import me.oeed.InstaCrafter.lib.LogHelper;
+import me.oeed.InstantCraftingTable.CrafterSlot;
+import me.oeed.InstantCraftingTable.InventoryRecipes;
+import me.oeed.InstantCraftingTable.helper.CraftingHelper;
+import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;

@@ -1,13 +1,14 @@
-package me.oeed.InstaCrafter.client.gui;
+package me.oeed.InstantCraftingTable.client.gui;
 
 import java.lang.reflect.Field;
 
-import me.oeed.InstaCrafter.CrafterSlot;
-import me.oeed.InstaCrafter.InstaCrafter;
-import me.oeed.InstaCrafter.client.gui.container.ContainerCrafter;
-import me.oeed.InstaCrafter.helper.CraftingHelper;
-import me.oeed.InstaCrafter.helper.GuiHelper;
-import me.oeed.InstaCrafter.lib.LogHelper;
+import me.oeed.InstantCraftingTable.CrafterSlot;
+import me.oeed.InstantCraftingTable.InstantCraftingTable;
+import me.oeed.InstantCraftingTable.client.gui.container.ContainerCrafter;
+import me.oeed.InstantCraftingTable.helper.ConfigHelper;
+import me.oeed.InstantCraftingTable.helper.CraftingHelper;
+import me.oeed.InstantCraftingTable.helper.GuiHelper;
+import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -25,7 +26,7 @@ import org.lwjgl.opengl.GL11;
 
 
 public class GuiCrafter extends GuiContainer{
-	public static final ResourceLocation texture = new ResourceLocation(InstaCrafter.MODID.toLowerCase(), "textures/gui/crafter.png");
+	public static final ResourceLocation texture = new ResourceLocation(InstantCraftingTable.MODID.toLowerCase(), "textures/gui/crafter.png");
 	public boolean isClientSideOnly;
 	
 	//used to 'mimic' a crafting table
@@ -44,16 +45,17 @@ public class GuiCrafter extends GuiContainer{
 	public void actionPerformed(GuiButton button){
 		if(button.id == 0)
 			GuiHelper.toggleCrafter();
-		else if(button.id == 1)
+		else if(button.id == 1){
 			LogHelper.log("State: "+((GuiButtonCheckbox)button).isChecked);
+			InstantCraftingTable.instance.configHelper.setValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT, !((GuiButtonCheckbox)button).isChecked);
+		}
 	}
 	
 	public void initGui(){
 		super.initGui();
 		buttonList.clear();
 		buttonList.add(new GuiButtonCrafterToggle(0, this.guiLeft + 174, this.guiTop + 4, false));
-		buttonList.add(new GuiButtonCheckbox(1, this.guiLeft + 8, this.guiTop + 198, "Default View", false));
-		//TODO: localisation
+		buttonList.add(new GuiButtonCheckbox(1, this.guiLeft + 8, this.guiTop + 198, I18n.getString("instantCraftingTable.defaultView"), !InstantCraftingTable.instance.configHelper.getValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT)));
 	}
 	
 	@Override
@@ -70,13 +72,9 @@ public class GuiCrafter extends GuiContainer{
 	@Override
 	protected void handleMouseClick(Slot slot, int slotIndex, int mouse, int shiftPressed){
 		if(!(slot instanceof CrafterSlot)){
-			//this.mc.playerController.windowClick(this.craftingTable.windowId, int slotIndex, int mouse, int shiftPressed, this.mc.thePlayer);
-
-			LogHelper.log("Crafting table click!");
 			CraftingHelper.craftingWindowClick(craftingTable, CraftingHelper.convertToCraftingSlot(craftingTable, slotIndex), mouse, shiftPressed, this.mc.thePlayer);
 			return;
 		}
-		LogHelper.log("Clickity click!");
         if (slot != null)
         {
             slotIndex = slot.slotNumber;
