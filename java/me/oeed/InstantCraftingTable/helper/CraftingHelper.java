@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import me.oeed.InstantCraftingTable.InventoryRecipes;
 import me.oeed.InstantCraftingTable.lib.LogHelper;
@@ -13,7 +14,6 @@ import net.minecraft.client.multiplayer.NetClientHandler;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
@@ -26,6 +26,7 @@ import net.minecraft.network.packet.Packet102WindowClick;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 
 public class CraftingHelper {
@@ -114,42 +115,78 @@ public class CraftingHelper {
 //	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.helper.CraftingHelper.craftItem(CraftingHelper.java:155)
 //	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.client.gui.container.ContainerCrafter.fu
 	
-	public static boolean doCraft(IRecipe recipe, InventoryPlayer invPlayer, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix, IInventory craftResult){
-		Minecraft client = FMLClientHandler.instance().getClient();
-        if(recipe instanceof ShapedRecipes){
-        	LogHelper.log("Crafting: "+recipe.getRecipeOutput());
-        	int itemsSlot = 0;
-    		for(int y = 0; y < ((ShapedRecipes)recipe).recipeHeight; y++) {
-            	for(int x = 0; x < ((ShapedRecipes)recipe).recipeWidth; x++) {
-            		int matrixSlot = (((ShapedRecipes)recipe).recipeWidth - x - 1 + y * ((ShapedRecipes)recipe).recipeWidth);
-        			ItemStack itemStack = ((ShapedRecipes)recipe).recipeItems[(((ShapedRecipes)recipe).recipeWidth - x - 1 + y * ((ShapedRecipes)recipe).recipeWidth)];
-        			if(itemStack == null)
-        				continue;
-        			else
-        				itemsSlot ++;
-        			int invSlot = convertToCraftingSlot(craftingTable, InventoryHelper.findItemInInventory(invPlayer, itemStack));
-
-        			
-            		
-        			
-        			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item slot that contains the needed item
-        			craftingWindowClick(craftingTable, matrixSlot + 1, mouseRightClick, shiftNotHeld, invPlayer.player); //'fake' click the needed item in to the crafting table
-        			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item back to the slot it was in
-        			
-        		}
+	public static void emptyCraftingTable(InventoryPlayer invPlayer, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix){
+		for(int y = 0; y < MAX_CRAFT_GRID_WIDTH; y++) {
+        	for(int x = 0; x < MAX_CRAFT_GRID_WIDTH; x++) {
+        		int matrixSlot = 1 + x + y * 3;
+        		craftingWindowClick(craftingTable, matrixSlot + 1, mouseLeftClick, shiftHeld, invPlayer.player); //'fake' shift click the item, hopefully sending it in to the players inventory
+        		craftingWindowClick(craftingTable, -999, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the item in to slot -999, dropping it (if there wasn't space)
         	}
-    		
-			LogHelper.log("Output: "+ craftingTable.getSlot(0).getStack());
-			//TODO: handle if the item isn't there and there's no inv space
-			craftingWindowClick(craftingTable, 0, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the recipe output, (hopefully) sending the item to the inventory
-			LogHelper.log("Final: "+ craftingTable.getSlot(0).getStack());
-			return true; 
+		}
+	}
+	
+	public static boolean doCraft(IRecipe recipe, InventoryPlayer invPlayer, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix, IInventory craftResult, boolean subComponent){
+		Minecraft client = FMLClientHandler.instance().getClient();
+		ItemStack[] recipeItems = getRecipeIngredients(recipe, true);
+		int recipeHeight = 3;
+		int recipeWidth = 3;
+        if(recipe instanceof ShapedRecipes){
+        	recipeWidth = ((ShapedRecipes) recipe).recipeWidth;
+        	recipeHeight = ((ShapedRecipes) recipe).recipeHeight;
         }
-        else{
-        	LogHelper.log("Not shaped");
+        else if(recipe instanceof ShapedOreRecipe){
+            recipeWidth = ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, (ShapedOreRecipe)recipe, "width");
+            recipeHeight = ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, (ShapedOreRecipe)recipe, "height");
         }
+        LogHelper.log(recipeWidth);
+        LogHelper.log(recipeHeight);
+        LogHelper.log(recipe);
+    	LogHelper.log("Crafting: "+recipe.getRecipeOutput());
+    	LogHelper.log("In: "+invPlayer.getItemStack());
+    	int itemsSlot = 0;
+		y: for(int y = 0; y < recipeHeight; y++) {
+        	for(int x = 0; x < recipeWidth; x++) {
+        		int matrixSlot = x + y * MAX_CRAFT_GRID_HEIGHT;
+        		if(recipeItems.length - 1 < itemsSlot){
+        			LogHelper.log(recipeItems.length - 1 + "<" + matrixSlot);
+        			//break y;
+        		}
+    			ItemStack itemStack = recipeItems[itemsSlot];
+    			LogHelper.log("Item: "+itemStack+" X: "+x+" Y: "+y+" ISlot: "+itemsSlot+" Slot: "+matrixSlot);
+    			itemsSlot ++;
+    			int invSlot = convertToCraftingSlot(craftingTable, InventoryHelper.findItemInInventory(invPlayer, itemStack));
+    			if(invSlot == -1 && itemStack != null){
+        			LogHelper.log("Missing: "+itemStack);
+    				break y;
+    			}
+    			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item slot that contains the needed item
+    			craftingWindowClick(craftingTable, matrixSlot + 1, mouseRightClick, shiftNotHeld, invPlayer.player); //'fake' click the needed item in to the crafting table
+    			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item back to the slot it was in
+    			if(craftingTable.getSlot(0).getStack() != null && InventoryHelper.isStackEqualTo(craftingTable.getSlot(0).getStack(), recipe.getRecipeOutput()))
+    				break y;
+    		}
+    	}
 		
-		return false;
+		if(craftingTable.getSlot(0).getStack()==null || !InventoryHelper.isStackEqualTo(craftingTable.getSlot(0).getStack(), recipe.getRecipeOutput())){
+			LogHelper.log("Something went wrong! Couldn't craft item using recipe: "+recipe+" (Creates: "+recipe.getRecipeOutput()+"). Please report this to oeed.", Level.WARNING);
+			LogHelper.log("Output: "+craftingTable.getSlot(0).getStack(), Level.WARNING);
+
+			for(int i = 0; i < 9; i++) {
+				LogHelper.log("Slot "+i+": "+craftingTable.getSlot(1+i).getStack(), Level.WARNING);
+			}
+			emptyCraftingTable(invPlayer, craftingTable, craftMatrix);
+			return false;
+		}
+		else if(subComponent)
+			craftingWindowClick(craftingTable, 0, mouseLeftClick, shiftHeld, invPlayer.player); //'fake' shift click the recipe output, (hopefully) sending the item to the inventory
+		else
+			craftingWindowClick(craftingTable, 0, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the recipe output, (hopefully) sending the item to the inventory
+
+		LogHelper.log("Crafted "+recipe.getRecipeOutput()+" Sub: "+subComponent);
+		//TODO: handle if the item isn't there and there's no inv space
+		return true; 
+		
+	//	return false;
 	}
 
 	public static ItemStack craftItem(ItemStack itemStack, InventoryPlayer invPlayer, List<ItemStack> usedIngredients, List<IRecipe> usedRecipes, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix, IInventory craftResult){
@@ -161,9 +198,9 @@ public class CraftingHelper {
 			IRecipe recipe = (IRecipe) recipes.get(i);
 			InventoryPlayer temp = new InventoryPlayer(invPlayer.player);
 	        temp.copyInventory(invPlayer);
-			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){
+			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){			
 				for(int r = usedRecipes.size() - 1; r >= 0 ; r--)
-					doCraft(usedRecipes.get(r), invPlayer, craftingTable, craftMatrix, craftResult);
+					doCraft(usedRecipes.get(r), invPlayer, craftingTable, craftMatrix, craftResult, r != 0);
 				return null;
 			}
 		}
@@ -182,6 +219,10 @@ public class CraftingHelper {
 	}
 	
 	public static ItemStack[] getRecipeIngredients(IRecipe recipe){
+		return getRecipeIngredients(recipe, false);
+	}
+	
+	public static ItemStack[] getRecipeIngredients(IRecipe recipe, boolean allowNull){
 		ArrayList recipeItems = null;
 		if(recipe instanceof ShapedRecipes) {
 			recipeItems = new ArrayList(Arrays.asList(((ShapedRecipes) recipe).recipeItems));
@@ -210,8 +251,9 @@ public class CraftingHelper {
 					
 			}
 		}
-
-		recipeItems.removeAll(Collections.singleton(null));
+		
+		if(!allowNull)
+			recipeItems.removeAll(Collections.singleton(null));
 		
 		return (ItemStack[])recipeItems.toArray(new ItemStack[recipeItems.size()]);
 	}
@@ -231,7 +273,6 @@ public class CraftingHelper {
 		if(ingredients == null){
 			return false;
 		}
-		
 		usedRecipes.add(recipe);
 
 //		System.out.println("i: "+ingredients.length);
@@ -259,7 +300,7 @@ public class CraftingHelper {
 			}
 			else if(recursion < maxRecursion){
 				canCraft = false;
-//				System.out.println("nope "+ingredients[i]);
+				//System.out.println("nope "+ingredients[i]);
 				ArrayList<IRecipe> recipes = getRecipesForItemStack(ingredients[i]);
 				//inventory doesn't have the required item, try to craft it using the available recipes
 				ArrayList<ItemStack> _blacklist = new ArrayList(2);
@@ -280,7 +321,7 @@ public class CraftingHelper {
 						int _slot = InventoryHelper.findItemInInventory(invPlayer, ingredients[i]);
 						InventoryHelper.consumeItem(invPlayer, _slot, usedIngredients);
 						canCraft = true;
-//						System.out.println("subcrafted "+ingredients[i].getDisplayName());
+						//System.out.println("subcrafted "+ingredients[i].getDisplayName());
 						break;
 					}
 				}

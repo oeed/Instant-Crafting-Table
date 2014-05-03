@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import me.oeed.InstantCraftingTable.CrafterSlot;
 import me.oeed.InstantCraftingTable.InventoryRecipes;
 import me.oeed.InstantCraftingTable.helper.CraftingHelper;
+import me.oeed.InstantCraftingTable.helper.GuiHelper;
+import me.oeed.InstantCraftingTable.helper.InventoryHelper;
 import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -104,20 +107,19 @@ public class ContainerCrafter extends Container {
 	@Override
 	public ItemStack slotClick(int slotIndex, int mouseButton, int modifierKey, EntityPlayer entityPlayer){
 		// -999 is thrown outside
-		if(slotIndex != -999 
-				&& inventorySlots.get(slotIndex) != null 
-				&& inventorySlots.get(slotIndex) instanceof CrafterSlot) {
+		if(slotIndex != -999 && inventorySlots.get(slotIndex) != null && inventorySlots.get(slotIndex) instanceof CrafterSlot) {
 			CrafterSlot slot = (CrafterSlot) inventorySlots.get(slotIndex);
-
-	        List<ItemStack> usedIngredients = new ArrayList();
-	        List<IRecipe> usedRecipes = new ArrayList();
-			ItemStack crafted = CraftingHelper.craftItem(slot.getStack(), entityPlayer.inventory, usedIngredients, usedRecipes, craftingTable, craftMatrix, craftResult);
-			update();
-			return crafted;
-			
+			ItemStack itemStack = entityPlayer.inventory.getItemStack();
+			if(itemStack == null || InventoryHelper.isStackEqualTo(slot.getStack(), itemStack) && itemStack.stackSize < itemStack.getMaxStackSize()){
+		        List<ItemStack> usedIngredients = new ArrayList();
+		        List<IRecipe> usedRecipes = new ArrayList();
+				ItemStack crafted = CraftingHelper.craftItem(slot.getStack(), entityPlayer.inventory, usedIngredients, usedRecipes, craftingTable, craftMatrix, craftResult);
+				update();
+				return crafted;
+			}
+			return null;
 		}
 		else{
-			LogHelper.log("def!");
 			return super.slotClick(slotIndex, mouseButton, modifierKey, entityPlayer);
 		}
 	}

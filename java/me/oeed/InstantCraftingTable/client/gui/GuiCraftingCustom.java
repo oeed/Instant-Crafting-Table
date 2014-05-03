@@ -1,7 +1,11 @@
 package me.oeed.InstantCraftingTable.client.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.oeed.InstantCraftingTable.InstantCraftingTable;
 import me.oeed.InstantCraftingTable.helper.ConfigHelper;
+import me.oeed.InstantCraftingTable.helper.CraftingHelper;
 import me.oeed.InstantCraftingTable.helper.GuiHelper;
 import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.client.gui.GuiButton;
@@ -9,6 +13,9 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ContainerWorkbench;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -39,7 +46,6 @@ public class GuiCraftingCustom extends GuiContainer {
 		if(button.id == 0)
 			GuiHelper.toggleCrafter();
 		else if(button.id == 1){
-			LogHelper.log("State: "+((GuiButtonCheckbox)button).isChecked);
 			InstantCraftingTable.instance.configHelper.setValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT, ((GuiButtonCheckbox)button).isChecked);
 		}
 	}
