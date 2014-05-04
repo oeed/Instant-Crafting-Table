@@ -1,7 +1,6 @@
 package me.oeed.InstantCraftingTable.client.gui;
 
 import java.lang.reflect.Field;
-
 import me.oeed.InstantCraftingTable.CrafterSlot;
 import me.oeed.InstantCraftingTable.InstantCraftingTable;
 import me.oeed.InstantCraftingTable.client.gui.container.ContainerCrafter;
@@ -16,7 +15,6 @@ import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.multiplayer.NetClientHandler;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.Slot;
@@ -24,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet102WindowClick;
 import net.minecraft.util.ResourceLocation;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -36,7 +35,6 @@ public class GuiCrafter extends GuiContainer{
 	public ContainerWorkbench craftingTable;
 
     //Amount scrolled (0 = top, 1 = bottom)
-    private float currentScroll;
 
     //True if the scrollbar is being dragged
     private boolean isScrolling;
@@ -48,26 +46,38 @@ public class GuiCrafter extends GuiContainer{
 		super(new ContainerCrafter(invPlayer, isClientSideOnly, craftingTable));
 		this.craftingTable = craftingTable;
 		this.isClientSideOnly = isClientSideOnly;
+        this.allowUserInput = true;
         this.guiLeft = (this.width - this.xSize) / 2;
         this.guiTop = (this.height - this.ySize) / 2;
 		xSize = 195;
 		ySize = 214;
 	}
 	
+	@Override
 	public void actionPerformed(GuiButton button){
-		if(button.id == 0)
+		if(button.id == 0) {
 			GuiHelper.toggleCrafter();
-		else if(button.id == 1){
+		} else if(button.id == 1){
 			LogHelper.log("State: "+((GuiButtonCheckbox)button).isChecked);
 			InstantCraftingTable.instance.configHelper.setValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT, !((GuiButtonCheckbox)button).isChecked);
 		}
 	}
 	
+	@Override
 	public void initGui(){
 		super.initGui();
 		buttonList.clear();
 		buttonList.add(new GuiButtonCrafterToggle(0, this.guiLeft + 174, this.guiTop + 4, false));
 		buttonList.add(new GuiButtonCheckbox(1, this.guiLeft + 8, this.guiTop + 198, I18n.getString("instantCraftingTable.defaultView"), !InstantCraftingTable.instance.configHelper.getValue(ConfigHelper.KEY_CRAFTINGTABLEDEFAULT)));
+        Keyboard.enableRepeatEvents(true);
+        this.searchField = new GuiTextField(this.fontRenderer, this.guiLeft + 82, this.guiTop + 6, 89, this.fontRenderer.FONT_HEIGHT);
+        this.searchField.setMaxStringLength(15);
+        this.searchField.setEnableBackgroundDrawing(false);
+        this.searchField.setTextColor(16777215);
+        this.searchField.setVisible(true);
+        this.searchField.setCanLoseFocus(false);
+        this.searchField.setFocused(true);
+        this.searchField.setText("");
 	}
 	
 	@Override
@@ -75,15 +85,14 @@ public class GuiCrafter extends GuiContainer{
 		GL11.glColor4f(1F, 1F, 1F, 1F);
 		Minecraft.getMinecraft().renderEngine.bindTexture(texture);
 		drawTexturedModalRect(guiLeft, guiTop, 0, 0, xSize, ySize);
-
-        drawTexturedModalRect(guiLeft + 175, (int) (guiTop + 18 + (73 * this.currentScroll)), 195 + (this.needsScrollBars() ? 0 : 12), 24, 12, 15);
-		
-		//I18n.getString(creativetabs.getTranslatedTabLabel())
+        drawTexturedModalRect(guiLeft + 175, (int) (guiTop + 18 + (73 * ((ContainerCrafter)this.inventorySlots).currentScroll)), 195 + (this.needsScrollBars() ? 0 : 12), 24, 12, 15);
+        this.searchField.drawTextBox();
         GL11.glDisable(GL11.GL_LIGHTING);
         this.fontRenderer.drawString(I18n.getString("itemGroup.search"), guiLeft + 8, guiTop + 6, 4210752);
         GL11.glEnable(GL11.GL_LIGHTING);
 	}
 	
+	@Override
 	public void drawScreen(int par1, int par2, float par3){
         boolean flag = Mouse.isButtonDown(0);
         int xStart = guiLeft + 174;
@@ -102,19 +111,19 @@ public class GuiCrafter extends GuiContainer{
         this.wasClicking = flag;
 
         if (this.isScrolling){
-            this.currentScroll = ((float)(par2 - yStart) - 7.5F) / ((float)(yStop - yStart) - 15.0F);
+        	((ContainerCrafter)this.inventorySlots).currentScroll = (par2 - yStart - 7.5F) / (yStop - yStart - 15.0F);
 
-            if (this.currentScroll < 0.0F)
+            if (((ContainerCrafter)this.inventorySlots).currentScroll < 0.0F)
             {
-                this.currentScroll = 0.0F;
+            	((ContainerCrafter)this.inventorySlots).currentScroll = 0.0F;
             }
 
-            if (this.currentScroll > 1.0F)
+            if (((ContainerCrafter)this.inventorySlots).currentScroll > 1.0F)
             {
-                this.currentScroll = 1.0F;
+            	((ContainerCrafter)this.inventorySlots).currentScroll = 1.0F;
             }
 
-            ((ContainerCrafter)this.inventorySlots).scrollTo(this.currentScroll);
+            ((ContainerCrafter)this.inventorySlots).scrollTo(((ContainerCrafter)this.inventorySlots).currentScroll);
         }
 
         super.drawScreen(par1, par2, par3);
@@ -158,14 +167,15 @@ public class GuiCrafter extends GuiContainer{
     /**
      * Handles mouse input.
      */
-    public void handleMouseInput()
+    @Override
+	public void handleMouseInput()
     {
         super.handleMouseInput();
         int i = Mouse.getEventDWheel();
 
         if (i != 0 && this.needsScrollBars())
         {
-            int j = ((ContainerCrafter)this.inventorySlots).availableRecipes.getCount() / 9 - 5 + 1;
+            int j = ((ContainerCrafter)this.inventorySlots).displayedRecipes.size() / 9 - 5 + 1;
 
             if (i > 0)
             {
@@ -177,24 +187,38 @@ public class GuiCrafter extends GuiContainer{
                 i = -1;
             }
 
-            this.currentScroll = (float)((double)this.currentScroll - (double)i / (double)j);
+            ((ContainerCrafter)this.inventorySlots).currentScroll = (float)(((ContainerCrafter)this.inventorySlots).currentScroll - (double)i / (double)j);
 
-            if (this.currentScroll < 0.0F)
+            if (((ContainerCrafter)this.inventorySlots).currentScroll < 0.0F)
             {
-                this.currentScroll = 0.0F;
+            	((ContainerCrafter)this.inventorySlots).currentScroll = 0.0F;
             }
 
-            if (this.currentScroll > 1.0F)
+            if (((ContainerCrafter)this.inventorySlots).currentScroll > 1.0F)
             {
-                this.currentScroll = 1.0F;
+            	((ContainerCrafter)this.inventorySlots).currentScroll = 1.0F;
             }
 
-            ((ContainerCrafter)this.inventorySlots).scrollTo(this.currentScroll);
+            ((ContainerCrafter)this.inventorySlots).scrollTo(((ContainerCrafter)this.inventorySlots).currentScroll);
+        }
+    }
+
+    private boolean needsScrollBars(){
+        return ((ContainerCrafter) inventorySlots).displayedRecipes.size() > 45;
+    }
+    
+    @Override
+	protected void keyTyped(char par1, int par2){
+        if (!this.checkHotbarKeys(par2)){
+            if (this.searchField.textboxKeyTyped(par1, par2)){
+            	((ContainerCrafter) inventorySlots).update(searchField.getText().toLowerCase());
+            }
+            else{
+                super.keyTyped(par1, par2);
+            }
         }
     }
 
 
-    private boolean needsScrollBars(){
-        return ((ContainerCrafter) inventorySlots).availableRecipes.getCount() > 45;
-    }
+
 }

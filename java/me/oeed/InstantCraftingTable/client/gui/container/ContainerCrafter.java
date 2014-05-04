@@ -1,15 +1,11 @@
 package me.oeed.InstantCraftingTable.client.gui.container;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import cpw.mods.fml.common.ObfuscationReflectionHelper;
 import me.oeed.InstantCraftingTable.CrafterSlot;
-import me.oeed.InstantCraftingTable.InventoryRecipes;
 import me.oeed.InstantCraftingTable.helper.CraftingHelper;
-import me.oeed.InstantCraftingTable.helper.GuiHelper;
-import me.oeed.InstantCraftingTable.helper.InventoryHelper;
 import me.oeed.InstantCraftingTable.helper.LogHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -21,17 +17,18 @@ import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.ShapedRecipes;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import cpw.mods.fml.client.FMLClientHandler;
 
 public class ContainerCrafter extends Container {
 	
 	public InventoryCrafting craftingInventory;
 	public InventoryPlayer invPlayer;
-	public InventoryRecipes availableRecipes;
+	public ArrayList<IRecipe> availableRecipes;
+	public ArrayList<IRecipe> displayedRecipes;
 	public boolean isClientSideOnly;
+	public String searchFilter;
+	public float currentScroll;
 
 	//used to 'mimic' a crafting table
 	public ContainerWorkbench craftingTable;
@@ -44,7 +41,8 @@ public class ContainerCrafter extends Container {
 		isClientSideOnly = clientSide;
 		this.craftingTable = craftingTable;
 		invPlayer = _invPlayer;
-		availableRecipes = new InventoryRecipes(500 * 9); //500 rows is plenty
+		availableRecipes = new ArrayList<IRecipe>();
+		displayedRecipes = new ArrayList<IRecipe>();
 		craftingInventory = new InventoryCrafting(this, 3, 3);
 		
 		for(int x = 0; x < 9; x++){
@@ -64,17 +62,59 @@ public class ContainerCrafter extends Container {
 		  }
 		}
 		
+		update("");
+	}
+	
+	public void update(String filter){
+		searchFilter = filter;
+		currentScroll = 0;
 		update();
 	}
 	
 	public void update(){
 		availableRecipes = CraftingHelper.getAvailableRecipes(invPlayer);
-        this.scrollTo(0.0f);		
+		displayedRecipes = (ArrayList<IRecipe>) availableRecipes.clone();
+		if(searchFilter != ""){
+	        Iterator iterator = displayedRecipes.iterator();
+			while (iterator.hasNext()){
+	            ItemStack itemstack = ((IRecipe) iterator.next()).getRecipeOutput();
+	            boolean flag = false;
+	            Iterator iterator1 = itemstack.getTooltip(invPlayer.player, FMLClientHandler.instance().getClient().gameSettings.advancedItemTooltips).iterator();
+
+	            while (true){
+	                if (iterator1.hasNext()){
+	                    String s1 = (String)iterator1.next();
+	                    if (!s1.toLowerCase().contains(searchFilter)){
+	                        continue;
+	                    }
+	                    flag = true;
+	                }
+
+	                if (!flag){
+	                    iterator.remove();
+	                }
+
+	                break;
+	            }
+	        }
+		}
+		
+		updateScroll();		
 	}
 	
 	public void scrollTo(float par1){
-		int rows = availableRecipes.getCount() / 9 - 5 + 1;
-		int row = (int)((double)(par1 * rows) + 0.5D);
+		currentScroll = par1;
+		updateScroll();
+	}
+	
+	public void updateScroll(){
+		int rows = displayedRecipes.size() / 9 - 5 + 1;
+		if(rows == 0){
+			LogHelper.log("Row 0");
+			currentScroll = 0.0F;
+		}
+		
+		int row = (int)(currentScroll * rows + 0.5D);
 		
 		if(row < 0){
 			row = 0;
@@ -83,8 +123,8 @@ public class ContainerCrafter extends Container {
 		for(int y = 0; y < 5; y ++){
 			for(int x = 0; x < 9; x ++){
 				int i = x + (9*(y + row));
-			    if (i >= 0 && i < availableRecipes.getCount()){			    	
-			    	inventory.setInventorySlotContents(x + (9 * y), (ItemStack)availableRecipes.getRecipeOutput(i));
+			    if (i >= 0 && i < displayedRecipes.size()){			    	
+			    	inventory.setInventorySlotContents(x + (9 * y), displayedRecipes.get(i).getRecipeOutput());
 			    }
 			    else{
 			    	inventory.setInventorySlotContents(x + (9 * y), (ItemStack)null);

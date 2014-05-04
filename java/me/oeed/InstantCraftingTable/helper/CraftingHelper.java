@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-import me.oeed.InstantCraftingTable.InventoryRecipes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.NetClientHandler;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -43,16 +42,16 @@ public class CraftingHelper {
 	private static final List<IRecipe> allRecipes = getAllRecipes();
 	
 	
-	public static InventoryRecipes getAvailableRecipes(InventoryPlayer invPlayer){
-		InventoryRecipes availableRecipes = new InventoryRecipes(500 * 9);
+	public static ArrayList<IRecipe> getAvailableRecipes(InventoryPlayer invPlayer){
+		ArrayList<IRecipe> availableRecipes = new ArrayList<IRecipe>();
 		for(int i = 0; i < allRecipes.size(); i++) {
-			IRecipe recipe = (IRecipe) allRecipes.get(i);
+			IRecipe recipe = allRecipes.get(i);
 			InventoryPlayer temp = new InventoryPlayer(invPlayer.player);
 	        temp.copyInventory(invPlayer);
 	        List<ItemStack> usedIngredients = new ArrayList();
 	        List<IRecipe> usedRecipes = new ArrayList();
 			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){
-				availableRecipes.addRecipe(recipe);
+				availableRecipes.add(recipe);
 			}
 		}
 		return availableRecipes;
@@ -124,8 +123,9 @@ public class CraftingHelper {
         		}
     			ItemStack itemStack = recipeItems[itemsSlot];
     			itemsSlot ++;
-    			if(itemStack == null)
-    				continue x;
+    			if(itemStack == null) {
+					continue x;
+				}
 
     			int invSlot = convertToCraftingSlot(craftingTable, InventoryHelper.findItemInInventory(invPlayer, itemStack));
     			if(invSlot == -1){
@@ -136,8 +136,9 @@ public class CraftingHelper {
     			craftingWindowClick(craftingTable, matrixSlot + 1, mouseRightClick, shiftNotHeld, invPlayer.player); //'fake' click the needed item in to the crafting table
     			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item back to the slot it was in
 
-    			if(craftingTable.getSlot(0).getStack() != null && InventoryHelper.isStackEqualTo(craftingTable.getSlot(0).getStack(), recipe.getRecipeOutput()))
-    				break y;
+    			if(craftingTable.getSlot(0).getStack() != null && InventoryHelper.isStackEqualTo(craftingTable.getSlot(0).getStack(), recipe.getRecipeOutput())) {
+					break y;
+				}
     		}
     	}
 		
@@ -151,10 +152,12 @@ public class CraftingHelper {
 			emptyCraftingTable(invPlayer, craftingTable, craftMatrix);
 			return false;
 		}
-		else if(subComponent)
+		else if(subComponent) {
 			craftingWindowClick(craftingTable, 0, mouseLeftClick, shiftHeld, invPlayer.player); //'fake' shift click the recipe output, (hopefully) sending the item to the inventory
-		else
+		}
+		else {
 			craftingWindowClick(craftingTable, 0, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the recipe output, (hopefully) sending the item to the inventory
+		}
 		//TODO: handle if the item isn't there and there's no inv space
 		return true;
 	}
@@ -167,17 +170,19 @@ public class CraftingHelper {
 		
 		ArrayList<IRecipe> recipes = getRecipesForItemStack(itemStack);
 		for(int i = 0; i < recipes.size(); i++) {
-			IRecipe recipe = (IRecipe) recipes.get(i);
+			IRecipe recipe = recipes.get(i);
 			if(playerStack != null && playerStack.stackSize + recipe.getRecipeOutput().stackSize > playerStack.getMaxStackSize()){
 				return null;
 			}
 			InventoryPlayer temp = new InventoryPlayer(invPlayer.player);
 	        temp.copyInventory(invPlayer);
 			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){
-				for(int r = 0; r < usedRecipes.size(); r++)
+				for(int r = 0; r < usedRecipes.size(); r++) {
 					LogHelper.log("R: "+usedRecipes.get(r).getRecipeOutput().getDisplayName());
-				for(int r = 0; r < usedRecipes.size(); r++)
+				}
+				for(int r = 0; r < usedRecipes.size(); r++) {
 					doCraft(usedRecipes.get(r), invPlayer, craftingTable, craftMatrix, craftResult, r != usedRecipes.size() - 1);
+				}
 				return null;
 			}
 		}
@@ -187,7 +192,7 @@ public class CraftingHelper {
 	public static ArrayList<IRecipe> getRecipesForItemStack(ItemStack itemStack){
 		ArrayList<IRecipe> recipes = new ArrayList<IRecipe>();
 		for(int i = 0; i < allRecipes.size(); i++) {
-			IRecipe recipe = (IRecipe) allRecipes.get(i);
+			IRecipe recipe = allRecipes.get(i);
 			if(recipe.getRecipeOutput() != null && InventoryHelper.isStackEqualTo(recipe.getRecipeOutput(), itemStack)){
 				recipes.add(recipe);
 			}
@@ -220,16 +225,17 @@ public class CraftingHelper {
 		
 		for(int i = 0; i < recipeItems.size(); i++) {
 			if(recipeItems.get(i) instanceof ArrayList){
-				if(((ArrayList)recipeItems.get(i)).size() > 0)
+				if(((ArrayList)recipeItems.get(i)).size() > 0) {
 					recipeItems.set(i, ((ArrayList)recipeItems.get(i)).get(0));
-				else{
+				} else{
 					recipeItems.set(i, null);
 				}
 			}
 		}
 		
-		if(!allowNull)
+		if(!allowNull) {
 			recipeItems.removeAll(Collections.singleton(null));
+		}
 		
 		return (ItemStack[])recipeItems.toArray(new ItemStack[recipeItems.size()]);
 	}
@@ -243,17 +249,21 @@ public class CraftingHelper {
 	}
 	
 	public static boolean canCraftRecipe(InventoryPlayer invPlayer, IRecipe recipe, List<ItemStack> usedIngredients, List<IRecipe> usedRecipes, int recursion, ArrayList<ItemStack> blacklist){
-		if(recursion >= maxRecursion)
+		if(recursion >= maxRecursion) {
 			return false;
+		}
 		ItemStack[] ingredients = getRecipeIngredients(recipe);
-		if(ingredients == null)
+		if(ingredients == null) {
 			return false;
+		}
 
 		boolean canCraft = false;
 		ingredients: for(int i = 0; i < ingredients.length; i++) {
-			for(int i2 = 0; i2 < blacklist.size(); i2++)
-				if(InventoryHelper.isStackEqualTo(ingredients[i], blacklist.get(i2)))
-					break ingredients;				
+			for(int i2 = 0; i2 < blacklist.size(); i2++) {
+				if(InventoryHelper.isStackEqualTo(ingredients[i], blacklist.get(i2))) {
+					break ingredients;
+				}
+			}				
 			
 			int slot = InventoryHelper.findItemInInventory(invPlayer, ingredients[i]);
 			if(slot != -1 && InventoryHelper.consumeItem(invPlayer, slot, usedIngredients)){
@@ -276,12 +286,14 @@ public class CraftingHelper {
 						break;
 					}
 				}
-				if(!canCraft)
+				if(!canCraft) {
 					return false;
+				}
 			}
 		}
-		if(canCraft)
+		if(canCraft) {
 			usedRecipes.add(recipe);
+		}
 		
 		return canCraft;
 	}
