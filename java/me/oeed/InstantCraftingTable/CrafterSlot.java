@@ -1,6 +1,6 @@
 package me.oeed.InstantCraftingTable;
 
-import me.oeed.InstantCraftingTable.lib.LogHelper;
+import me.oeed.InstantCraftingTable.helper.LogHelper;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;

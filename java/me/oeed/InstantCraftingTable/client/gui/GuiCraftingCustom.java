@@ -7,7 +7,7 @@ import me.oeed.InstantCraftingTable.InstantCraftingTable;
 import me.oeed.InstantCraftingTable.helper.ConfigHelper;
 import me.oeed.InstantCraftingTable.helper.CraftingHelper;
 import me.oeed.InstantCraftingTable.helper.GuiHelper;
-import me.oeed.InstantCraftingTable.lib.LogHelper;
+import me.oeed.InstantCraftingTable.helper.LogHelper;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;

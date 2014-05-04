@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import me.oeed.InstantCraftingTable.client.ClientKeyHandler;
 import me.oeed.InstantCraftingTable.client.ClientTickHandler;
 import me.oeed.InstantCraftingTable.helper.ConfigHelper;
-import me.oeed.InstantCraftingTable.lib.LogHelper;
+import me.oeed.InstantCraftingTable.helper.LogHelper;
 import net.minecraft.client.settings.KeyBinding;
 
 import org.lwjgl.input.Keyboard;

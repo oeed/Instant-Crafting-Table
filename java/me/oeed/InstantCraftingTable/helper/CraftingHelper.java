@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import me.oeed.InstantCraftingTable.InventoryRecipes;
-import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.NetClientHandler;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
@@ -46,33 +45,16 @@ public class CraftingHelper {
 	
 	public static InventoryRecipes getAvailableRecipes(InventoryPlayer invPlayer){
 		InventoryRecipes availableRecipes = new InventoryRecipes(500 * 9);
-		//List<IRecipe> allRecipes = getAllRecipes();
-
-
 		for(int i = 0; i < allRecipes.size(); i++) {
 			IRecipe recipe = (IRecipe) allRecipes.get(i);
 			InventoryPlayer temp = new InventoryPlayer(invPlayer.player);
 	        temp.copyInventory(invPlayer);
-	        //&& recipe instanceof ShapedOreRecipe && recipe.getRecipeOutput().itemID == Item.stick.itemID
 	        List<ItemStack> usedIngredients = new ArrayList();
 	        List<IRecipe> usedRecipes = new ArrayList();
-			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){// && (recipe instanceof ShapedRecipes || recipe instanceof ShapelessRecipes)){
-				//System.out.println("Adding "+i);
+			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){
 				availableRecipes.addRecipe(recipe);
 			}
-			else{
-
-				//System.out.println("Cannot craft: "+recipe.getRecipeOutput());
-				//System.out.println("Cannot craft: "+recipe);
-			}
 		}
-        
-        //create a list of the ingredients used
-        
-        //loop through all the ingredients
-        //check if the item is in the inventory, if so consume
-        //if it's not, get all recipes that create the required item and try to craft it
-		
 		return availableRecipes;
 	}
 	
@@ -106,16 +88,9 @@ public class CraftingHelper {
             throw new RuntimeException(e);
         }
     }
-//	
-//	2014-04-28 08:56:56 [INFO] [STDERR] at org.multimc.EntryPoint.listen(EntryPoint.java:165)
-//	2014-04-28 08:56:56 [INFO] [STDERR] at org.multimc.EntryPoint.main(EntryPoint.java:54)
-//	2014-04-28 08:56:56 [INFO] [STDERR] Caused by: java.lang.RuntimeException: java.lang.NoSuchFieldException: netClientHandler
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.helper.CraftingHelper.craftingWindowClick(CraftingHelper.java:92)
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.helper.CraftingHelper.doCraft(CraftingHelper.java:124)
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.helper.CraftingHelper.craftItem(CraftingHelper.java:155)
-//	2014-04-28 08:56:56 [INFO] [STDERR] at me.oeed.InstantCraftingTable.client.gui.container.ContainerCrafter.fu
-	
+
 	public static void emptyCraftingTable(InventoryPlayer invPlayer, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix){
+		craftingWindowClick(craftingTable, -999, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the item in to slot -999, dropping it
 		for(int y = 0; y < MAX_CRAFT_GRID_WIDTH; y++) {
         	for(int x = 0; x < MAX_CRAFT_GRID_WIDTH; x++) {
         		int matrixSlot = 1 + x + y * 3;
@@ -138,30 +113,29 @@ public class CraftingHelper {
             recipeWidth = ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, (ShapedOreRecipe)recipe, "width");
             recipeHeight = ObfuscationReflectionHelper.getPrivateValue(ShapedOreRecipe.class, (ShapedOreRecipe)recipe, "height");
         }
-        LogHelper.log(recipeWidth);
-        LogHelper.log(recipeHeight);
-        LogHelper.log(recipe);
-    	LogHelper.log("Crafting: "+recipe.getRecipeOutput());
-    	LogHelper.log("In: "+invPlayer.getItemStack());
+
     	int itemsSlot = 0;
 		y: for(int y = 0; y < recipeHeight; y++) {
-        	for(int x = 0; x < recipeWidth; x++) {
+        	x: for(int x = 0; x < recipeWidth; x++) {
         		int matrixSlot = x + y * MAX_CRAFT_GRID_HEIGHT;
         		if(recipeItems.length - 1 < itemsSlot){
-        			LogHelper.log(recipeItems.length - 1 + "<" + matrixSlot);
-        			//break y;
+        			LogHelper.log(recipeItems.length - 1 + "<" + matrixSlot+ " FIX THIS!");
+        			break y;
         		}
     			ItemStack itemStack = recipeItems[itemsSlot];
-    			LogHelper.log("Item: "+itemStack+" X: "+x+" Y: "+y+" ISlot: "+itemsSlot+" Slot: "+matrixSlot);
     			itemsSlot ++;
+    			if(itemStack == null)
+    				continue x;
+
     			int invSlot = convertToCraftingSlot(craftingTable, InventoryHelper.findItemInInventory(invPlayer, itemStack));
-    			if(invSlot == -1 && itemStack != null){
-        			LogHelper.log("Missing: "+itemStack);
+    			if(invSlot == -1){
+        			LogHelper.log("Missing item: "+itemStack, Level.WARNING);
     				break y;
     			}
     			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item slot that contains the needed item
     			craftingWindowClick(craftingTable, matrixSlot + 1, mouseRightClick, shiftNotHeld, invPlayer.player); //'fake' click the needed item in to the crafting table
     			craftingWindowClick(craftingTable, invSlot, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the players item back to the slot it was in
+
     			if(craftingTable.getSlot(0).getStack() != null && InventoryHelper.isStackEqualTo(craftingTable.getSlot(0).getStack(), recipe.getRecipeOutput()))
     				break y;
     		}
@@ -181,26 +155,29 @@ public class CraftingHelper {
 			craftingWindowClick(craftingTable, 0, mouseLeftClick, shiftHeld, invPlayer.player); //'fake' shift click the recipe output, (hopefully) sending the item to the inventory
 		else
 			craftingWindowClick(craftingTable, 0, mouseLeftClick, shiftNotHeld, invPlayer.player); //'fake' click the recipe output, (hopefully) sending the item to the inventory
-
-		LogHelper.log("Crafted "+recipe.getRecipeOutput()+" Sub: "+subComponent);
 		//TODO: handle if the item isn't there and there's no inv space
-		return true; 
-		
-	//	return false;
+		return true;
 	}
 
 	public static ItemStack craftItem(ItemStack itemStack, InventoryPlayer invPlayer, List<ItemStack> usedIngredients, List<IRecipe> usedRecipes, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix, IInventory craftResult){
-		if(itemStack == null)
+		ItemStack playerStack = invPlayer.getItemStack();
+		if(itemStack == null || (playerStack != null && !InventoryHelper.isStackEqualTo(playerStack, itemStack))){
 			return null;
+		}
 		
 		ArrayList<IRecipe> recipes = getRecipesForItemStack(itemStack);
 		for(int i = 0; i < recipes.size(); i++) {
 			IRecipe recipe = (IRecipe) recipes.get(i);
+			if(playerStack != null && playerStack.stackSize + recipe.getRecipeOutput().stackSize > playerStack.getMaxStackSize()){
+				return null;
+			}
 			InventoryPlayer temp = new InventoryPlayer(invPlayer.player);
 	        temp.copyInventory(invPlayer);
-			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){			
-				for(int r = usedRecipes.size() - 1; r >= 0 ; r--)
-					doCraft(usedRecipes.get(r), invPlayer, craftingTable, craftMatrix, craftResult, r != 0);
+			if(recipe != null && canCraftRecipe(temp, recipe, usedIngredients, usedRecipes)){
+				for(int r = 0; r < usedRecipes.size(); r++)
+					LogHelper.log("R: "+usedRecipes.get(r).getRecipeOutput().getDisplayName());
+				for(int r = 0; r < usedRecipes.size(); r++)
+					doCraft(usedRecipes.get(r), invPlayer, craftingTable, craftMatrix, craftResult, r != usedRecipes.size() - 1);
 				return null;
 			}
 		}
@@ -248,7 +225,6 @@ public class CraftingHelper {
 				else{
 					recipeItems.set(i, null);
 				}
-					
 			}
 		}
 		
@@ -270,67 +246,43 @@ public class CraftingHelper {
 		if(recursion >= maxRecursion)
 			return false;
 		ItemStack[] ingredients = getRecipeIngredients(recipe);
-		if(ingredients == null){
+		if(ingredients == null)
 			return false;
-		}
-		usedRecipes.add(recipe);
-
-//		System.out.println("i: "+ingredients.length);
 
 		boolean canCraft = false;
 		ingredients: for(int i = 0; i < ingredients.length; i++) {
-			for(int i2 = 0; i2 < blacklist.size(); i2++) {
-				if(InventoryHelper.isStackEqualTo(ingredients[i], blacklist.get(i2))){
-//					System.out.println("blacklisted: "+i+" "+ingredients[i]);
-					break ingredients;
-				}
-				
-			}
+			for(int i2 = 0; i2 < blacklist.size(); i2++)
+				if(InventoryHelper.isStackEqualTo(ingredients[i], blacklist.get(i2)))
+					break ingredients;				
+			
 			int slot = InventoryHelper.findItemInInventory(invPlayer, ingredients[i]);
-
-//			System.out.println("r: "+recursion);
-//			System.out.println("Ingredient: "+i+" "+ingredients[i]+" "+ingredients[i].getDisplayName()+" "+slot);
 			if(slot != -1 && InventoryHelper.consumeItem(invPlayer, slot, usedIngredients)){
-
-//				System.out.println("yep");
 				canCraft = true;
-				//the item is in the inventory
-				//return true;
-				//continue;
 			}
 			else if(recursion < maxRecursion){
-				canCraft = false;
-				//System.out.println("nope "+ingredients[i]);
-				ArrayList<IRecipe> recipes = getRecipesForItemStack(ingredients[i]);
 				//inventory doesn't have the required item, try to craft it using the available recipes
+				canCraft = false;
+				ArrayList<IRecipe> recipes = getRecipesForItemStack(ingredients[i]);
 				ArrayList<ItemStack> _blacklist = new ArrayList(2);
 				_blacklist.add(recipe.getRecipeOutput());
 				_blacklist.add(ingredients[i]);
 				
 				for(int i2 = 0; i2 < recipes.size(); i2++) {
-//					try {
-//					    Thread.sleep(250);
-//					} catch(InterruptedException ex) {
-//					    Thread.currentThread().interrupt();
-//					}
-
-					
-					
 					if(canCraftRecipe(invPlayer, recipes.get(i2), usedIngredients, usedRecipes, recursion + 1, _blacklist)){
 						InventoryHelper.addItemToInventory(invPlayer, recipes.get(i2).getRecipeOutput());
 						int _slot = InventoryHelper.findItemInInventory(invPlayer, ingredients[i]);
 						InventoryHelper.consumeItem(invPlayer, _slot, usedIngredients);
 						canCraft = true;
-						//System.out.println("subcrafted "+ingredients[i].getDisplayName());
 						break;
 					}
 				}
 				if(!canCraft)
 					return false;
-				//the item isn't in the inventory, try to craft it
 			}
 		}
-
+		if(canCraft)
+			usedRecipes.add(recipe);
+		
 		return canCraft;
 	}
 	

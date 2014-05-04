@@ -3,7 +3,7 @@ package me.oeed.InstantCraftingTable.client;
 import java.util.EnumSet;
 
 import me.oeed.InstantCraftingTable.helper.GuiHelper;
-import me.oeed.InstantCraftingTable.lib.LogHelper;
+import me.oeed.InstantCraftingTable.helper.LogHelper;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 

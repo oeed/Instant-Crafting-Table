@@ -1,4 +1,4 @@
-package me.oeed.InstantCraftingTable.lib;
+package me.oeed.InstantCraftingTable.helper;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

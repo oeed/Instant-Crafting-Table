@@ -5,7 +5,6 @@ import me.oeed.InstantCraftingTable.client.gui.GuiButtonCheckbox;
 import me.oeed.InstantCraftingTable.client.gui.GuiCrafter;
 import me.oeed.InstantCraftingTable.client.gui.GuiCraftingCustom;
 import me.oeed.InstantCraftingTable.client.gui.container.ContainerCrafter;
-import me.oeed.InstantCraftingTable.lib.LogHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiCrafting;
 import net.minecraft.inventory.ContainerWorkbench;
