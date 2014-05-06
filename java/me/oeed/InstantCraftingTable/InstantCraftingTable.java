@@ -23,7 +23,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = InstantCraftingTable.MODID, name = InstantCraftingTable.NAME, version = InstantCraftingTable.VERSION)
-@NetworkMod(clientSideRequired = true, serverSideRequired = true)
+@NetworkMod(clientSideRequired = true, serverSideRequired = false)
 public class InstantCraftingTable
 {
        public static final String MODID = "InstantCraftingTable";

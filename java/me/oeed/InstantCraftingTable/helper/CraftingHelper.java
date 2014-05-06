@@ -75,17 +75,23 @@ public class CraftingHelper {
 	public static ItemStack craftingWindowClick(ContainerWorkbench craftingTable, int par2, int par3, int par4, EntityPlayer par5EntityPlayer){
         short short1 = craftingTable.getNextTransactionID(par5EntityPlayer.inventory);
         ItemStack itemstack = craftingTable.slotClick(par2, par3, par4, par5EntityPlayer);
-        try {
-	        Field field = PlayerControllerMP.class.getDeclaredField("netClientHandler");
-	        field.setAccessible(true);
-	        NetClientHandler netClientHandler = (NetClientHandler) field.get(Minecraft.getMinecraft().playerController);
-	        netClientHandler.addToSendQueue(new Packet102WindowClick(craftingTable.windowId, par2, par3, par4, itemstack, short1));
-	        return itemstack;
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+////	        Field field = PlayerControllerMP.class.getDeclaredField("netClientHandler");
+////	        field.setAccessible(true);
+//	        //NetClientHandler netClientHandler = (NetClientHandler) field.get(Minecraft.getMinecraft().playerController);
+//	        
+//	        NetClientHandler netClientHandler = ObfuscationReflectionHelper.getPrivateValue(PlayerControllerMP.class, (PlayerControllerMP)Minecraft.getMinecraft().playerController, "width");
+//	        netClientHandler.addToSendQueue(new Packet102WindowClick(craftingTable.windowId, par2, par3, par4, itemstack, short1));
+//	        return itemstack;
+//        } catch (NoSuchFieldException e) {
+//            throw new RuntimeException(e);
+//        } catch (IllegalAccessException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        NetClientHandler netClientHandler = Minecraft.getMinecraft().getNetHandler();//ObfuscationReflectionHelper.getPrivateValue(PlayerControllerMP.class, (PlayerControllerMP)Minecraft.getMinecraft().playerController, "netClientHandler");
+        netClientHandler.addToSendQueue(new Packet102WindowClick(craftingTable.windowId, par2, par3, par4, itemstack, short1));
+        return itemstack;
     }
 
 	public static void emptyCraftingTable(InventoryPlayer invPlayer, ContainerWorkbench craftingTable, InventoryCrafting craftMatrix){
